@@ -3,12 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <title>BMW Jobs</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    h1 {
+        color: #0d4f8b;
+    }
+
+    button {
+        margin-bottom: 10px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #0d4f8b;
+        color: white;
+    }
+  </style>
 </head>
 <body>
     <h1>BMW Thesis / Internship Jobs</h1>
     <button id="refreshBtn">Check Now</button>
-    <div id="countdown">Next auto-check in <span id="timer">60</span> seconds</div>
     <table id="jobsTable" border="1">
         <thead>
             <tr>
@@ -23,7 +52,51 @@
         </thead>
         <tbody></tbody>
     </table>
+<script>
+    const refreshBtn = document.getElementById("refreshBtn");
 
-    <script src="/static/js/main.js"></script>
+    function parseDate(ddmmyyyy) {
+        // Convert DD.MM.YYYY to a proper Date object
+        const [day, month, year] = ddmmyyyy.split('.');
+        return new Date(year, month - 1, day); // month is 0-indexed
+    }
+
+    function fetchJobs() {
+        fetch("/api/jobs")
+            .then(res => res.json())
+            .then(data => {
+                // Sort descending by parsed published_date
+                data.sort((a, b) => parseDate(b.published_date) - parseDate(a.published_date));
+
+                const tbody = document.querySelector("#jobsTable tbody");
+                tbody.innerHTML = "";
+                data.forEach(job => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${job.title}</td>
+                        <td>${job.ref_no}</td>
+                        <td>${job.location}</td>
+                        <td>${job.type}</td>
+                        <td>${job.published_date}</td>
+                        <td>${job.is_new ? "Yes" : ""}</td>
+                        <td><a href="${job.link}" target="_blank">Link</a></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+    }
+
+    refreshBtn.addEventListener("click", () => {
+        fetch("/api/check-now")
+            .then(res => res.json())
+            .then(() => {
+                fetchJobs();
+            });
+    });
+
+    // Initial fetch
+    fetchJobs();
+</script>
+
 </body>
 </html>

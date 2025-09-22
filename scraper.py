@@ -4,21 +4,6 @@ from database import get_connection, upsert_job
 
 BASE_URL = "https://www.bmwgroup.jobs/"
 
-URL = "https://www.bmwgroup.jobs/de/en/students/finalthesis/_jcr_content/main/layoutcontainer_359813111/jobfinder30_copy_cop_1986864682.jobfinder_table.content.html"
-
-PARAMS = {
-    "textSearch": "Studienabschlussarbeit | Thesis",
-    "filterSearch": "location_DE,jobType_INTERNSHIP",
-    "rowIndex": 0,
-    "blockCount": 40
-}
-
-HEADERS = {
-    "User-Agent": "Mozilla/5.0",
-    "Referer": "https://www.bmwgroup.jobs/de/en/students/finalthesis.html",
-    "X-Requested-With": "XMLHttpRequest"
-}
-
 def parse_jobs(html):
     print("parse jobs")
     print(html)
@@ -55,16 +40,40 @@ def parse_jobs(html):
     return jobs
 
 def fetch_and_store_jobs():
-    print("fetch_and_store_jobs")
-    response = requests.get(URL, params=PARAMS, headers=HEADERS)
-    if response.status_code != 200:
-        print("not 200")
-        return []
-    
-    print("BRO")
-    jobs = parse_jobs(response.text)
-    print(jobs)
-    conn = get_connection()
-    for job in jobs:
-        upsert_job(conn, job)
-    return jobs
+    import requests
+
+    url = "https://www.bmwgroup.jobs/de/en/students/finalthesis/_jcr_content/main/layoutcontainer_359813111/jobfinder30_copy_cop_1986864682.jobfinder_table.content.html"
+
+    params = {
+        "textSearch": "Studienabschlussarbeit | Thesis",
+        "filterSearch": "location_DE,jobType_INTERNSHIP",
+        "rowIndex": 0,     # pagination start
+        "blockCount": 40    # number of results per page
+    }
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "Referer": "https://www.bmwgroup.jobs/de/en/students/finalthesis.html",
+        "X-Requested-With": "XMLHttpRequest"
+    }
+
+    # send request
+    response = requests.get(url, params=params, headers=headers)
+
+    if response.status_code == 200:
+        html = response.text
+        print(html)  # print first 1000 characters to inspect
+        jobs = parse_jobs(response.text)
+        print(jobs)
+        conn = get_connection()
+        for job in jobs:
+            upsert_job(conn, job)
+        return jobs
+    else:
+        print("Error:", response.status_code)
+        
+
+
+
+# fetch_and_store_jobs()
+fetch_and_store_jobs()

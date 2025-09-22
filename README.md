@@ -1,1 +1,1 @@
-uvicorn app.main:app --port 5014
+uvicorn main:app --port 5014
