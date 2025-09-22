@@ -76,4 +76,4 @@ def fetch_and_store_jobs():
 
 
 # fetch_and_store_jobs()
-fetch_and_store_jobs()
+# fetch_and_store_jobs()
