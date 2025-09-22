@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
+# from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 from database import get_connection
@@ -7,7 +7,7 @@ from scraper import fetch_and_store_jobs
 from scheduler import start_scheduler
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Start the background scheduler
